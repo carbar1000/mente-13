@@ -1,1 +1,24 @@
 .vercel
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules
+
+# Build output
+.next/
+out/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

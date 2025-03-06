@@ -3,16 +3,18 @@
 |-- .vercel
     |-- project.json
     |-- README.txt
+|-- css
+    |-- webform-mente.css
 |-- form-handler.js
 |-- index.html
+|-- js
+    |-- server.js
+    |-- webform-mente-navigate.js
+    |-- webform-mente.js
 |-- obrigado.css
 |-- obrigado.html
 |-- package-lock.json
 |-- package.json
 |-- README.md
-|-- server.js
 |-- TECHNICAL_SPECS.md
 |-- vercel.json
-|-- webform-mente-navigate.js
-|-- webform-mente.css
-|-- webform-mente.js
