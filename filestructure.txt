@@ -1,0 +1,17 @@
+|-- .env.local
+|-- .gitgnore
+|-- env.js
+|-- form-handler.js
+|-- index.html
+|-- obrigado.css
+|-- obrigado.html
+|-- package-lock.json
+|-- package.json
+|-- README.md
+|-- server.js
+|-- TECHNICAL_SPECS.md
+|-- teste-form.html
+|-- vercel.json
+|-- webform-mente-navigate.js
+|-- webform-mente.css
+|-- webform-mente.js

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário Teste - Supabase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        #status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .error {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">Verificando conexão...</div>
+
+    <h1>Formulário Teste</h1>
+    <form id="testForm">
+        <div class="form-group">
+            <label>Cor favorita:</label>
+            <select name="A" required>
+                <option value="">Selecione</option>
+                <option value="azul">Azul</option>
+                <option value="vermelho">Vermelho</option>
+                <option value="verde">Verde</option>
+                <option value="amarelo">Amarelo</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Animal favorito:</label>
+            <select name="B" required>
+                <option value="">Selecione</option>
+                <option value="cão">Cão</option>
+                <option value="gato">Gato</option>
+                <option value="leão">Leão</option>
+                <option value="zebra">Zebra</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Hobby favorito:</label>
+            <select name="C" required>
+                <option value="">Selecione</option>
+                <option value="música">Música</option>
+                <option value="ler">Leitura</option>
+                <option value="teatro">Teatro</option>
+                <option value="arte">Arte</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Nome:</label>
+            <input type="text" name="nome" required>
+        </div>
+
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" name="email" required>
+        </div>
+
+        <button type="submit">Enviar</button>
+    </form>
+
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://lxwljusqjxudgqsnvjnh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4d2xqdXNxanh1ZGdxc252am5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4NDkyODIsImV4cCI6MjA1NjQyNTI4Mn0.cTeq659XWygbWEEelcic85BhsqjIYSO_w3X7PYwcB70';
+
+        // Função para testar conexão com logs detalhados
+        async function testConnection() {
+            const statusDiv = document.getElementById('status');
+            
+            // Log das configurações (ocultando parte da chave por segurança)
+            console.log('Tentando conectar ao Supabase:', {
+                url: SUPABASE_URL,
+                keyPreview: `${SUPABASE_ANON_KEY.substring(0, 10)}...`
+            });
+
+            try {
+                statusDiv.textContent = 'Testando conexão...';
+                statusDiv.className = '';
+
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/respostas?select=count`, {
+                    method: 'HEAD',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                console.log('Resposta do Supabase:', {
+                    status: response.status,
+                    ok: response.ok,
+                    statusText: response.statusText
+                });
+
+                if (response.ok) {
+                    statusDiv.textContent = '✅ Conectado ao Supabase';
+                    statusDiv.className = 'success';
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error('Detalhes do erro:', {
+                    message: error.message,
+                    name: error.name,
+                    stack: error.stack
+                });
+
+                statusDiv.textContent = `❌ Erro na conexão: ${error.message}`;
+                statusDiv.className = 'error';
+                return false;
+            }
+        }
+
+        // Função para enviar dados com validação adicional
+        async function submitForm(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            // Validação dos dados antes do envio
+            const data = {
+                nome: formData.get('nome'),
+                email: formData.get('email'),
+                A: formData.get('A'),
+                B: formData.get('B'),
+                C: formData.get('C')
+            };
+
+            // Log dos dados (removendo informações sensíveis)
+            console.log('Tentando enviar dados:', {
+                ...data,
+                email: '***@***.***' // Oculta o email real
+            });
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/respostas`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                console.log('Resposta do envio:', {
+                    status: response.status,
+                    ok: response.ok,
+                    statusText: response.statusText
+                });
+
+                if (response.ok) {
+                    alert('Dados enviados com sucesso!');
+                    form.reset();
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(`Erro no servidor: ${response.status} - ${errorText}`);
+                }
+            } catch (error) {
+                console.error('Erro no envio:', error);
+                alert(`Erro ao enviar dados: ${error.message}`);
+            }
+        }
+
+        // Inicialização com retry
+        async function initialize() {
+            let attempts = 0;
+            const maxAttempts = 3;
+
+            while (attempts < maxAttempts) {
+                console.log(`Tentativa de conexão ${attempts + 1}/${maxAttempts}`);
+                if (await testConnection()) {
+                    break;
+                }
+                attempts++;
+                if (attempts < maxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initialize);
+        document.getElementById('testForm').addEventListener('submit', submitForm);
+    </script>
+</body>
+</html>
