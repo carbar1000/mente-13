@@ -5,6 +5,7 @@
     |-- project.json
     |-- README.txt
 |-- api
+    |-- csrf-token.js
     |-- submit-form.js
 |-- css
     |-- webform-mente.css

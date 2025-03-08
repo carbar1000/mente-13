@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
+import { parse } from 'cookie';
+import { body, validationResult } from 'express-validator';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
@@ -23,6 +25,30 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST') {
         try {
+            // Get CSRF token from request body and cookie
+            const csrfTokenFromBody = req.body.csrf_token;
+            const cookies = parse(req.headers.cookie || '');
+            const csrfTokenFromCookie = cookies.csrf_token;
+
+            // Validate CSRF token
+            if (!csrfTokenFromBody || !csrfTokenFromCookie || csrfTokenFromBody !== csrfTokenFromCookie) {
+                return res.status(400).json({ message: 'CSRF token validation failed' });
+            }
+
+            // Validate request body
+            await Promise.all([
+                body('A').notEmpty().trim().escape().run(req),
+                body('B').notEmpty().trim().escape().run(req),
+                body('C').notEmpty().trim().escape().run(req),
+                body('nome').notEmpty().trim().escape().run(req),
+                body('email').isEmail().normalizeEmail().run(req),
+            ]);
+
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ message: 'Validation failed', errors: errors.array() });
+            }
+
             const { A, B, C, nome, email } = req.body;
 
             const { data, error } = await supabase

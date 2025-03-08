@@ -23,7 +23,7 @@
 </head>
 <body>
     <div id="supabase-status" style="position: fixed; top: 10px; right: 10px; padding: 10px; border-radius: 5px; display: none; z-index: 1000;">
-        Verificando conexão com Supabase...
+        Conectado ao Supabase!
     </div>
 
     <div id="intro" class="centered-text hide-on-click">
@@ -166,12 +166,28 @@
     <script src="./js/webform-mente-navigate.js"></script>
     <script src="form-handler.js" type="module"></script>
     <script>
+        async function getCSRFToken() {
+            const response = await fetch('/api/csrf-token');
+            const data = await response.json();
+            document.getElementById('csrf_token').value = data.csrfToken;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            getCSRFToken();
             const form = document.getElementById('myForm');
             if (form) {
                 setTimeout(() => {
                     form.classList.add('visible');
                 }, 100);
+            }
+
+            // Show Supabase status
+            const supabaseStatus = document.getElementById('supabase-status');
+            if (supabaseStatus) {
+                supabaseStatus.style.display = 'block';
+                setTimeout(() => {
+                    supabaseStatus.style.display = 'none';
+                }, 3000);
             }
         });
     </script>
