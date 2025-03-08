@@ -8,7 +8,7 @@ function initializeForm() {
 }
 
 // UI Navigation Functions
-function startSurvey() {
+export function startSurvey() {
     const intro = document.getElementById('intro');
     const form = document.getElementById('myForm');
     
@@ -19,7 +19,7 @@ function startSurvey() {
     }
 }
 
-function autoNext() {
+export function autoNext() {
     const currentContainer = document.querySelector('.form-container.active');
     if (currentContainer) {
         const nextButton = currentContainer.querySelector('button[onclick="navigate(1)"]');
@@ -61,7 +61,7 @@ function validateForm(currentStep) {
 }
 
 // Função para exibir mensagens de feedback
-function showFlashMessage(message, type) {
+export function showFlashMessage(message, type) {
     const flashMessageDiv = document.getElementById('flashMessage');
     flashMessageDiv.textContent = message;
     flashMessageDiv.className = type; // 'error' ou 'success'
