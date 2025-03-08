@@ -22,6 +22,11 @@ async function sendToGoogleSheets(formData) {
     }
 }
 
+const SUPABASE_CONFIG = {
+    url: import.meta.env.VITE_SUPABASE_URL,
+    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY
+};
+
 // Função para enviar para Supabase
 async function sendToSupabase(formData) {
     try {
@@ -35,14 +40,14 @@ async function sendToSupabase(formData) {
         };
 
         console.log('Enviando para Supabase...');
-        console.log('SUPABASE_CONFIG.url:', process.env.VITE_SUPABASE_URL);
-        console.log('SUPABASE_CONFIG.anonKey:', process.env.VITE_SUPABASE_ANON_KEY);
+        console.log('SUPABASE_CONFIG.url:', SUPABASE_CONFIG.url);
+        console.log('SUPABASE_CONFIG.anonKey:', SUPABASE_CONFIG.anonKey);
 
-        const response = await fetch(`${process.env.VITE_SUPABASE_URL}/rest/v1/respostas`, {
+        const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/respostas`, {
             method: 'POST',
             headers: {
-                'apikey': process.env.VITE_SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${process.env.VITE_SUPABASE_ANON_KEY}`,
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
                 'Content-Type': 'application/json',
                 'Prefer': 'return=minimal'
             },
