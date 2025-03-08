@@ -1,13 +1,20 @@
+// Função para exibir mensagens de feedback
+export function showFlashMessage(message, type) {
+    const flashMessageDiv = document.getElementById('flashMessage');
+    flashMessageDiv.textContent = message;
+    flashMessageDiv.className = type; // 'error' ou 'success'
+    flashMessageDiv.classList.remove('hidden');
+    setTimeout(() => {
+        flashMessageDiv.classList.add('hidden');
+    }, 3000);
+}
+
+// Outras funções...
 function generateCSRFToken() {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-function initializeForm() {
-    const csrfToken = generateCSRFToken();
-    document.getElementById('csrf_token').value = csrfToken;
-}
-
-// UI Navigation Functions
+// Também precisamos exportar outras funções que são usadas globalmente
 export function startSurvey() {
     const intro = document.getElementById('intro');
     const form = document.getElementById('myForm');
@@ -58,17 +65,6 @@ function validateForm(currentStep) {
 
     container.querySelector('.error-message').classList.remove('show');
     return true;
-}
-
-// Função para exibir mensagens de feedback
-export function showFlashMessage(message, type) {
-    const flashMessageDiv = document.getElementById('flashMessage');
-    flashMessageDiv.textContent = message;
-    flashMessageDiv.className = type; // 'error' ou 'success'
-    flashMessageDiv.classList.remove('hidden');
-    setTimeout(() => {
-        flashMessageDiv.classList.add('hidden');
-    }, 3000);
 }
 
 // Modificar a função que controla a navegação entre as etapas
