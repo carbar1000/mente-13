@@ -20,14 +20,15 @@ Sistema de formulário web para coleta de dados sobre perfil empreendedor, com a
 
 ### 2.3 Estrutura de Arquivos
 ```
-webform-mente-13/
-├── index.html           # Página principal do formulário
-├── obrigado.html       # Página de agradecimento
-├── webform-mente.css   # Estilos principais
-├── obrigado.css        # Estilos da página de agradecimento
-├── webform-mente.js    # Lógica principal
-├── webform-mente-navigate.js # Navegação do formulário
-└── form-handler.js     # Manipulação de envio do formulário
+|-- index.html
+|-- obrigado.html
+|-- css
+|   |-- webform-mente.css
+|-- js
+|   |-- webform-mente.js
+|   |-- form-handler.js
+|-- .env.local
+|-- vercel.json
 ```
 
 ## 3. Integrações
@@ -40,7 +41,7 @@ webform-mente-13/
   - timestamp
   - Cor favorita (A)
   - Animal favorito (B)
-  - Hobby favorito (C)
+  - Estação favorita (C)
   - Nome
   - Email
 
@@ -71,13 +72,16 @@ CREATE TABLE respostas (
 - 
 
 ### 4.2 Variáveis de Ambiente (Vercel)
-```env
-SUPABASE_URL=sua_url
-SUPABASE_ANON_KEY=sua_chave
-GOOGLE_SHEET_ID=seu_id
-```
+PS C:\form-mente-web\webform-mente-13> vercel env ls | Select-String "SUPABASE"
+Vercel CLI 41.3.2
+> Environment Variables found for carbar1000s-projects/mente-13 
 
-As variáveis do Supabase (`SUPABASE_URL` e `SUPABASE_ANON_KEY`) devem ser definidas no ficheiro `.env.local` para ambiente de teste local e nas configurações de variáveis de ambiente não públicas do Vercel para produção online.
+ VITE_SUPABASE_ANON_KEY     Encrypted           Production          6h 
+ago     
+ VITE_SUPABASE_URL          Encrypted           Production          6h   
+ago
+
+
 
 ## 5. Fluxo de Dados
 1. Usuário preenche formulário
@@ -98,6 +102,7 @@ As variáveis do Supabase (`SUPABASE_URL` e `SUPABASE_ANON_KEY`) devem ser defin
 
 
 
-
+## No supabase enviar para a tabela respostas
+- enviar para a tabela respostas
 
 
