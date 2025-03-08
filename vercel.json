@@ -1,14 +1,8 @@
 {
   "version": 2,
-  "public": true,
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "github": {
-    "silent": true
-  },
- "builds": [
+  "builds": [
     {
-      "src": "*",
+      "src": "**/*",
       "use": "@vercel/static"
     }
   ],
