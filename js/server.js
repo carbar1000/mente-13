@@ -12,12 +12,11 @@ app.use(express.static('.'));
 
 // Middleware para injetar variáveis de ambiente no HTML
 app.get('*', (req, res, next) => {
-    // Injeta as variáveis de ambiente como objeto global
     if (req.path.endsWith('.html')) {
         res.header('Content-Type', 'text/html');
-        console.log('Serving HTML file:', req.path);
         let html = require('fs').readFileSync(path.join(__dirname, req.path), 'utf8');
-
+        
+        // Injeta as variáveis de ambiente como objeto global
         const envScript = `
             <script>
                 window.ENV = {
@@ -26,9 +25,9 @@ app.get('*', (req, res, next) => {
                 };
             </script>
         `;
-        console.log('Injetando window.ENV:', envScript);
-
-        html = html.replace("</head>", envScript + "</head>");
+        
+        // Insere o script antes do fechamento do </head>
+        html = html.replace('</head>', `${envScript}</head>`);
         res.send(html);
     } else {
         next();

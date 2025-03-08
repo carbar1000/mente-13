@@ -1,4 +1,4 @@
-// Função para enviar para Google Sheets
+// Função para enviar para Google Sheets funciona ok
 async function sendToGoogleSheets(formData) {
     try {
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzdLpEgmmmlPFV_V-W0s9lF-f3QrtU4fBwmcQEAI5Et962tLFjsLms2FRSivtyYAx_3dA/exec';
@@ -23,23 +23,26 @@ async function sendToGoogleSheets(formData) {
 }
 
 // Função para enviar para Supabase
-async function submitToSupabase(formData) {
-    // Estrutura exata conforme a tabela no Supabase
-    const data = {
-        A: formData.get('A'),
-        B: formData.get('B'),
-        C: formData.get('C'),
-        nome: formData.get('Nome'),
-        email: formData.get('Email'),
-        created_at: new Date().toISOString()
-    };
-
+async function sendToSupabase(formData) {
     try {
-        const response = await fetch(`${window.ENV.SUPABASE_URL}/rest/v1/respostas`, {
+        const data = {
+            A: formData.get('A'),
+            B: formData.get('B'),
+            C: formData.get('C'),
+            nome: formData.get('Nome'),
+            email: formData.get('Email'),
+            created_at: new Date().toISOString()
+        };
+
+        console.log('Enviando para Supabase...');
+        console.log('SUPABASE_CONFIG.url:', SUPABASE_CONFIG.url);
+        console.log('SUPABASE_CONFIG.anonKey:', SUPABASE_CONFIG.anonKey);
+
+        const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/respostas`, {
             method: 'POST',
             headers: {
-                'apikey': window.ENV.SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${window.ENV.SUPABASE_ANON_KEY}`,
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
                 'Content-Type': 'application/json',
                 'Prefer': 'return=minimal'
             },
@@ -47,13 +50,14 @@ async function submitToSupabase(formData) {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Erro HTTP: ${response.status}`);
         }
 
-        return true;
+        console.log('Dados enviados com sucesso para Supabase');
+        return { ok: true };
     } catch (error) {
         console.error('Erro ao enviar para Supabase:', error);
-        return false;
+        return { ok: false, error };
     }
 }
 
@@ -73,11 +77,11 @@ async function handleFormSubmit(event) {
         const googleSheetsResult = await sendToGoogleSheets(formData);
         console.log('Resultado Google Sheets:', googleSheetsResult);
         
-        const supabaseResult = await submitToSupabase(formData);
+        const supabaseResult = await sendToSupabase(formData);
         console.log('Resultado Supabase:', supabaseResult);
 
         // Verifica se pelo menos uma integração funcionou
-        if (googleSheetsResult.ok || supabaseResult) {
+        if (googleSheetsResult.ok || supabaseResult.ok) {
             console.log('Pelo menos uma integração teve sucesso');
             showFlashMessage('Dados enviados com sucesso!', 'success');
             setTimeout(() => {
@@ -103,27 +107,11 @@ function showFlashMessage(message, type = 'info') {
     }
 }
 
+// Adiciona o event listener ao formulário
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('myForm');
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
     }
-});
+  });
 
-// Adicionar log de sucesso
-console.log('Dados enviados:', {
-    timestamp: new Date().toISOString(),
-    status: 'success'
-});
-
-// Monitoramento de taxa de sucesso
-let submissionStats = {
-    total: 0,
-    successful: 0
-};
-
-function updateStats(success) {
-    submissionStats.total++;
-    if (success) submissionStats.successful++;
-    console.log(`Taxa de sucesso: ${(submissionStats.successful/submissionStats.total*100).toFixed(2)}%`);
-}
