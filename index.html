@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <script src="env.js"></script>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'></text></svg>">
-    <meta name="theme-color" content="#ffffff">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Formulário de Pesquisa para descobrir se você tem mente empreendedora.">
@@ -11,73 +8,18 @@
     <link rel="stylesheet" href="./css/webform-mente.css">
     <style>
         .hidden {
-            display: none;
+            display: none !important;
+        }
+        
+        #myForm {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        
+        #myForm.visible {
+            opacity: 1;
         }
     </style>
-    <script>
-        // Função para testar a conexão com retry e timeout
-        console.log('Inicializando a conexão com Supabase...');
-
-        async function testSupabaseConnection() {
-            const statusDiv = document.getElementById('supabase-status');
-            statusDiv.style.display = 'block';
-            statusDiv.textContent = 'Testando conexão...';
-
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-                // Test endpoint changed to a more reliable one
-                const response = await fetch(`${window.ENV.SUPABASE_URL}/rest/v1/`, {
-                    method: 'GET',
-                    headers: {
-                        'apikey': window.ENV.SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${window.ENV.SUPABASE_ANON_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-
-                if (response.ok) {
-                    statusDiv.style.backgroundColor = '#4CAF50';
-                    statusDiv.textContent = '✅ Conectado ao Supabase';
-                    return true;
-                } else {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-            } catch (error) {
-                statusDiv.style.backgroundColor = '#f44336';
-                statusDiv.textContent = `❌ Falha na conexão: ${error.message}`;
-                console.error('Erro detalhado:', error);
-                return false;
-            }
-        }
-
-        // Função de inicialização com retry
-        async function initializeSupabase() {
-            const maxRetries = 3;
-            const retryDelay = 1000; // 1 segundo
-
-            for (let i = 0; i < maxRetries; i++) {
-                console.log(`Tentativa ${i + 1} de ${maxRetries}`);
-
-                if (await testSupabaseConnection()) {
-                    return true;
-                }
-
-                if (i < maxRetries - 1) {
-                    await new Promise(resolve => setTimeout(resolve, retryDelay));
-                }
-            }
-            return false;
-        }
-
-        // Inicializar quando o DOM estiver pronto
-        document.addEventListener('DOMContentLoaded', initializeSupabase);
-    </script>
 </head>
 <body>
     <div id="supabase-status" style="position: fixed; top: 10px; right: 10px; padding: 10px; border-radius: 5px; display: none; z-index: 1000;">
@@ -85,23 +27,25 @@
     </div>
 
     <div id="intro" class="centered-text hide-on-click">
-        <h1>Tens Mente Empreendedora? >>>> 12.16 </h1>
+        <h1>Tens Mente Empreendedora? >>>> 12.17 </h1>
         <h3>Preencha este inquérito e descubra GRÁTIS agora!</h3>
         <div class="buttons">
             <button id="startButton" class="hide-on-click" onclick="startSurvey()">Comece Aqui →</button>
         </div>
     </div>
 
-    <form id="myForm" class="hidden" method="POST">
+    <form id="myForm" class="hidden">
+        
         <input type="hidden" name="csrf_token" id="csrf_token">
         <input type="hidden" name="timestamp" id="timestamp">
         <!-- Seção Cor Favorita -->
-        <div class="form-container active" id="cor-favorita">
+        <div class="form-container" id="cor-favorita">
             <div class="form-group">
                 <h2>Qual sua cor favorita?</h2>
+                <div class="validation-message"></div>
                 <div role="radiogroup" aria-labelledby="cor-label">
                     <div class="option-container">
-                        <input type="radio" id="azul" name="A" value="azul" onclick="autoNext()">
+                        <input type="radio" id="azul" name="A" value="azul" onclick="autoNext()" required>
                         <label for="azul">Azul</label>
                     </div>
                     <div class="option-container">
@@ -117,19 +61,21 @@
                         <label for="amarelo">Amarelo</label>
                     </div>
                 </div>
-            </div>
-            <div class="buttons">
-                <button type="button" onclick="navigate(-1)" disabled>← Anterior</button>
-                <button type="button" onclick="navigate(1)">Próximo →</button>
+                <div class="error-message">Por favor, escolha uma resposta!</div>
+                <div class="buttons">
+                 
+                    <button type="button" onclick="navigate(1)">Próximo →</button>
+                </div>
             </div>
         </div>
-        <!-- Seção Animal -->
+        <!-- Seção Animal Favorito -->
         <div class="form-container" id="animal-favorito">
             <div class="form-group">
                 <h2>Qual seu animal favorito?</h2>
+                <div class="validation-message"></div>
                 <div role="radiogroup" aria-labelledby="animal-label">
                     <div class="option-container">
-                        <input type="radio" id="cao" name="B" value="cão" onclick="autoNext()">
+                        <input type="radio" id="cao" name="B" value="cão" onclick="autoNext()" required>
                         <label for="cao">Cão</label>
                     </div>
                     <div class="option-container">
@@ -141,64 +87,73 @@
                         <label for="leao">Leão</label>
                     </div>
                     <div class="option-container">
-                        <input type="radio" id="zebra" name="B" value="zebra" onclick="autoNext()">
-                        <label for="zebra">Zebra</label>
+                        <input type="radio" id="aguia" name="B" value="águia" onclick="autoNext()">
+                        <label for="aguia">Águia</label>
                     </div>
                 </div>
-            </div>
-            <div class="buttons">
-                <button type="button" onclick="navigate(-1)">← Anterior</button>
-                <button type="button" onclick="navigate(1)">Próximo →</button>
+                <div class="buttons">
+                    <button type="button" onclick="navigate(-1)">← Anterior</button>
+                    <button type="button" onclick="navigate(1)">Próximo →</button>
+                </div>
+                <div class="error-message">Por favor, escolha uma resposta!</div>
             </div>
         </div>
-        <!-- Seção Hobbies -->
-        <div class="form-container" id="hobby-favorito">
+        <!-- Seção Clima Favorito -->
+        <div class="form-container" id="clima-favorito">
             <div class="form-group">
-                <h2>Qual seu hobby favorito?</h2>
-                <div role="radiogroup" aria-labelledby="hobby-label">
+                <h2>Qual seu clima favorito?</h2>
+                <div class="validation-message"></div>
+                <div role="radiogroup" aria-labelledby="clima-label">
                     <div class="option-container">
-                        <input type="radio" id="musica" name="C" value="música" onclick="autoNext()">
-                        <label for="musica">Música</label>
+                        <input type="radio" id="sol" name="C" value="sol" onclick="autoNext()" required>
+                        <label for="sol">Sol</label>
                     </div>
                     <div class="option-container">
-                        <input type="radio" id="ler" name="C" value="ler" onclick="autoNext()">
-                        <label for="ler">Leitura</label>
+                        <input type="radio" id="chuva" name="C" value="chuva" onclick="autoNext()">
+                        <label for="chuva">Chuva</label>
                     </div>
                     <div class="option-container">
-                        <input type="radio" id="teatro" name="C" value="teatro" onclick="autoNext()">
-                        <label for="teatro">Teatro</label>
+                        <input type="radio" id="nublado" name="C" value="nublado" onclick="autoNext()">
+                        <label for="nublado">Nublado</label>
                     </div>
                     <div class="option-container">
-                        <input type="radio" id="arte" name="C" value="arte" onclick="autoNext()">
-                        <label for="arte">Arte</label>
+                        <input type="radio" id="neve" name="C" value="neve" onclick="autoNext()">
+                        <label for="neve">Neve</label>
                     </div>
                 </div>
-            </div>
-            <div class="buttons">
-                <button type="button" onclick="navigate(-1)">← Anterior</button>
-                <button type="button" onclick="navigate(1)">Próximo →</button>
+                <div class="buttons">
+                    <button type="button" onclick="navigate(-1)">← Anterior</button>
+                    <button type="button" onclick="navigate(1)">Próximo →</button>
+                </div>
+                <div class="error-message">Por favor, escolha uma resposta!</div>
             </div>
         </div>
         <!-- Seção Dados Pessoais -->
         <div class="form-container" id="dados-pessoais">
             <div class="form-group">
+                <h2>Seus dados</h2>
+                <div class="validation-message"></div>
                 <label for="nome">Nome completo</label>
                 <input type="text" id="nome" name="Nome" required aria-describedby="nome-help" pattern="[A-Za-z\s]+" title="Por favor, insira apenas letras.">
-            </div>
-            <div class="buttons">
-                <button type="button" onclick="navigate(-1)">← Anterior</button>
-                <button type="button" onclick="navigate(1)">Próximo →</button>
+                <div class="buttons">
+                    <button type="button" onclick="navigate(-1)">← Anterior</button>
+                    <button type="button" onclick="navigate(1)">Próximo →</button>
+                </div>
+                <div class="error-message">Por favor, escolha uma resposta!</div>
             </div>
         </div>
         <!-- Seção Contato -->
         <div class="form-container" id="dados-contato">
             <div class="form-group">
+                <h2>Seu contato</h2>
+                <div class="validation-message"></div>
                 <label for="email">E-mail</label>
                 <input type="email" id="email" name="Email" required aria-describedby="email-help" pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}">
-            </div>
-            <div class="buttons">
-                <button type="button" onclick="navigate(-1)">← Anterior</button>
-                <button type="submit">Enviar formulário</button>
+                <div class="buttons">
+                    <button type="button" onclick="navigate(-1)">← Anterior</button>
+                    <button type="submit">Enviar formulário</button>
+                </div>
+                <div class="error-message">Por favor, escolha uma resposta!</div>
             </div>
         </div>
     </form>
@@ -211,5 +166,15 @@
     <script src="./js/webform-mente.js"></script>
     <script src="./js/webform-mente-navigate.js"></script>
     <script src="./js/form-handler.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('myForm');
+            if (form) {
+                setTimeout(() => {
+                    form.classList.add('visible');
+                }, 100);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -32,8 +32,32 @@ function autoNext() {
 }
 
 // Função de validação do formulário
-function validateForm() {
-    return validateCurrentContainer();
+function validateForm(currentStep) {
+    const container = document.querySelector(`.form-container[data-step="${currentStep}"]`);
+    const options = container.querySelectorAll('input[type="radio"]');
+    const errorMessage = container.querySelector('.error-message');
+    
+    if (!errorMessage) {
+        const msg = document.createElement('div');
+        msg.className = 'error-message';
+        msg.textContent = 'Por favor, escolha uma resposta!';
+        container.appendChild(msg);
+    }
+
+    let isChecked = false;
+    options.forEach(option => {
+        if (option.checked) isChecked = true;
+    });
+
+    if (!isChecked) {
+        container.querySelector('.error-message').classList.add('show');
+        container.classList.add('shake');
+        setTimeout(() => container.classList.remove('shake'), 500);
+        return false;
+    }
+
+    container.querySelector('.error-message').classList.remove('show');
+    return true;
 }
 
 // Função para exibir mensagens de feedback
@@ -45,6 +69,13 @@ function showFlashMessage(message, type) {
     setTimeout(() => {
         flashMessageDiv.classList.add('hidden');
     }, 3000);
+}
+
+// Modificar a função que controla a navegação entre as etapas
+function nextStep() {
+    if (!validateForm(currentStep)) return;
+    
+    // ... resto do código existente para navegação ...
 }
 
 // Make functions available globally

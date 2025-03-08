@@ -22,7 +22,7 @@ body {
 }
 
 .form-container {
-    display: none;
+    display: flex; /* Changed from 'none' to always be flex */
     flex-direction: column;
     align-items: center;
     margin: 0 auto;
@@ -30,19 +30,88 @@ body {
     background: var(--surface-color);
     border-radius: var(--border-radius);
     box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.5);
-    position: relative;
+    position: absolute;
     width: 100%;
     max-width: 850px;
-    transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
-    transform: translateX(100%);
+    transition: all 0.5s ease-in-out;
     opacity: 0;
+    transform: translateX(100%); /* Garante que começa pela direita */
+    visibility: hidden; /* Added visibility property */
+}
+
+.form-container:first-of-type {
+    opacity: 1;
+    transform: translateX(0);
+    visibility: visible;
 }
 
 .form-container.active {
     display: flex;
-    transform: translateX(0);
     opacity: 1;
+    transform: translateX(0);
+    visibility: visible; /* Added visibility property */
 }
+
+.form-container.previous {
+    transform: translateX(-100%);
+    opacity: 0;
+    visibility: hidden; /* Added visibility property */
+}
+
+#myForm {
+    position: relative; /* Adicionado */
+    min-height: 400px; /* Ajuste conforme necessário */
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+/* Animação de fade */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateX(100%);
+        visibility: visible;
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+        visibility: visible;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+        visibility: visible;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-100%);
+        visibility: hidden;
+    }
+}
+
+/* Estilos para as opções */
+.option-container {
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUp 0.5s ease forwards;
+}
+
+@keyframes slideUp {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Adicione delay para cada opção */
+.option-container:nth-child(1) { animation-delay: 0.1s; }
+.option-container:nth-child(2) { animation-delay: 0.2s; }
+.option-container:nth-child(3) { animation-delay: 0.3s; }
+.option-container:nth-child(4) { animation-delay: 0.4s; }
 
 .centered-text {
     text-align: center;
@@ -112,6 +181,10 @@ input[type="email"]:focus {
     z-index: 1;
 }
 
+.buttons-right {
+    justify-content: flex-end;
+}
+
 .buttons::before {
     content: '';
     position: absolute;
@@ -125,7 +198,7 @@ input[type="email"]:focus {
 }
 
 .buttons button {
-    background-color: // var(--primary-color);
+    background-color: transparent;
     color: var(--text-color);
     border: none;
     padding: 12px 25px;
@@ -161,24 +234,38 @@ input[type="email"]:focus {
     position: fixed;
     top: 20px;
     right: 20px;
-    padding: 15px;
-    border-radius: 5px;
+    padding: 15px 25px;
+    border-radius: 8px;
     z-index: 1000;
-    display: none;
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+    background-color: #2196F3;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.flash-message.success { background-color: #4CAF50; color: white; }
-.flash-message.error { background-color: #f44336; color: white; }
-.flash-message.info { background-color: #2196F3; color: white; }
-
 .flash-message.show {
-    display: block;
-    animation: fadeIn 0.3s ease-in;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.flash-message.info {
+    background-color: #2196F3;
+    color: white;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .modal {
@@ -226,19 +313,43 @@ input[type="email"]:focus {
     color: black;
 }
 
+@media (min-width: 1200px) {
+    .form-container {
+        max-width: 90%; /* Adjust as needed */
+    }
+}
+
 @media (max-width: 768px) {
     .form-container {
         padding: 20px;
+        max-width: 95%;
+        margin: 0 auto;
     }
-    
+
     .buttons {
         flex-direction: column;
         gap: 10px;
     }
-    
+
     .buttons button {
         width: 100%;
     }
+}
+
+@media (max-width: 480px) {
+  .form-container {
+        padding: 10px;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    .buttons {
+       flex-direction: column;
+       gap: 10px;
+   }
+
+   .buttons button {
+       width: 100%;
+   }
 }
 
 /* New classes for hide functionality */
@@ -264,4 +375,124 @@ input[type="email"]:focus {
 
 #supabase-status:hover {
     transform: scale(1.05);
+}
+
+.error-highlight {
+    border: 2px solid rgba(255, 68, 68, 0.5) !important;
+    background-color: rgba(255, 68, 68, 0.05) !important;
+    animation: gentlePulse 1.5s infinite;
+}
+
+@keyframes gentlePulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.2);
+    }
+    50% {
+        transform: scale(1.01);
+        box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 68, 68, 0);
+    }
+}
+
+.shake {
+    animation: gentleShake 0.7s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes gentleShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+.option-container {
+    transition: all 0.3s ease;
+}
+
+.option-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.validation-message {
+    color: #2196F3;
+    font-size: 14px;
+    margin: 8px 0;
+    padding: 8px;
+    border-radius: 4px;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    text-align: center;
+}
+
+.validation-message.show {
+    display: block;
+    opacity: 1;
+    animation: fadeInMessage 0.3s ease-in-out;
+}
+
+@keyframes fadeInMessage {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-group {
+    position: relative;
+}
+
+.error-message {
+    color: #ff4444;
+    font-size: 14px;
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 4px;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    text-align: center;
+    background-color: rgba(255, 68, 68, 0.1);
+}
+
+.error-message.show {
+    display: block;
+    opacity: 1;
+    animation: fadeInMessage 0.3s ease-in-out;
+}
+
+/* Add required field indicator */
+.required-field::after {
+    content: '*';
+    color: #ff4444;
+    margin-left: 4px;
+}
+
+.option-container.required {
+    border: 2px solid var(--border-color);
+}
+
+.option-container.required.error {
+    border-color: #ff4444;
+    animation: gentleShake 0.7s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.error-text {
+    color: #ff4444;
+    font-size: 14px;
+    margin-top: 5px;
+    display: none;
+}
+
+.error-text.visible {
+    display: block;
+    animation: fadeInMessage 0.3s ease-in-out;
 }
