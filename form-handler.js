@@ -22,49 +22,49 @@ async function sendToGoogleSheets(formData) {
     }
 }
 
-const SUPABASE_CONFIG = {
-    url: import.meta.env.VITE_SUPABASE_URL,
-    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY
-};
+// const SUPABASE_CONFIG = {
+//     url: import.meta.env.VITE_SUPABASE_URL,
+//     anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY
+// };
 
 // Função para enviar para Supabase
-async function sendToSupabase(formData) {
-    try {
-        const data = {
-            A: formData.get('A'),
-            B: formData.get('B'),
-            C: formData.get('C'),
-            nome: formData.get('Nome'),
-            email: formData.get('Email'),
-            created_at: new Date().toISOString()
-        };
+// async function sendToSupabase(formData) {
+//     try {
+//         const data = {
+//             A: formData.get('A'),
+//             B: formData.get('B'),
+//             C: formData.get('C'),
+//             nome: formData.get('Nome'),
+//             email: formData.get('Email'),
+//             created_at: new Date().toISOString()
+//         };
 
-        console.log('Enviando para Supabase...');
-        console.log('SUPABASE_CONFIG.url:', SUPABASE_CONFIG.url);
-        console.log('SUPABASE_CONFIG.anonKey:', SUPABASE_CONFIG.anonKey);
+//         console.log('Enviando para Supabase...');
+//         console.log('SUPABASE_CONFIG.url:', SUPABASE_CONFIG.url);
+//         console.log('SUPABASE_CONFIG.anonKey:', SUPABASE_CONFIG.anonKey);
 
-        const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/respostas`, {
-            method: 'POST',
-            headers: {
-                'apikey': SUPABASE_CONFIG.anonKey,
-                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify(data)
-        });
+//         const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/respostas`, {
+//             method: 'POST',
+//             headers: {
+//                 'apikey': SUPABASE_CONFIG.anonKey,
+//                 'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+//                 'Content-Type': 'application/json',
+//                 'Prefer': 'return=minimal'
+//             },
+//             body: JSON.stringify(data)
+//         });
 
-        if (!response.ok) {
-            throw new Error(`Erro HTTP: ${response.status}`);
-        }
+//         if (!response.ok) {
+//             throw new Error(`Erro HTTP: ${response.status}`);
+//         }
 
-        console.log('Dados enviados com sucesso para Supabase');
-        return { ok: true };
-    } catch (error) {
-        console.error('Erro ao enviar para Supabase:', error);
-        return { ok: false, error };
-    }
-}
+//         console.log('Dados enviados com sucesso para Supabase');
+//         return { ok: true };
+//     } catch (error) {
+//         console.error('Erro ao enviar para Supabase:', error);
+//         return { ok: false, error };
+//     }
+// }
 
 // Função principal de manipulação do formulário
 async function handleFormSubmit(event) {
@@ -82,11 +82,11 @@ async function handleFormSubmit(event) {
         const googleSheetsResult = await sendToGoogleSheets(formData);
         console.log('Resultado Google Sheets:', googleSheetsResult);
         
-        const supabaseResult = await sendToSupabase(formData);
-        console.log('Resultado Supabase:', supabaseResult);
+        // const supabaseResult = await sendToSupabase(formData);
+        // console.log('Resultado Supabase:', supabaseResult);
 
         // Verifica se pelo menos uma integração funcionou
-        if (googleSheetsResult.ok || supabaseResult.ok) {
+        if (googleSheetsResult.ok ) { //|| supabaseResult.ok
             console.log('Pelo menos uma integração teve sucesso');
             showFlashMessage('Dados enviados com sucesso!', 'success');
             setTimeout(() => {
