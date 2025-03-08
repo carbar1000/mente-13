@@ -45,41 +45,63 @@ document.addEventListener('DOMContentLoaded', () => {
         myForm.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            // Desabilita o formulário durante o envio
-            const submitButton = myForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            
+            // Validação client-side
+            if (!validateForm()) {
+                return;
+            }
+
+            showFlashMessage('Enviando dados...', 'info');
+
+            const formData = new FormData(event.target);
+            const data = {
+                A: sanitizeInput(formData.get('A')),
+                B: sanitizeInput(formData.get('B')),
+                C: sanitizeInput(formData.get('C')),
+                Nome: sanitizeInput(formData.get('Nome')),
+                Email: sanitizeInput(formData.get('Email')),
+                timestamp: new Date().toISOString(),
+                csrf_token: document.getElementById('csrf_token').value
+            };
+
             try {
-                // Validação client-side
-                if (!validateForm()) {
-                    submitButton.disabled = false;
-                    return;
+                // Envio sequencial
+                let googleSuccess = false;
+                let supabaseSuccess = false;
+
+                // Primeiro Google Sheets
+                try {
+                    const googleResult = await sendToGoogleSheets(data);
+                    googleSuccess = googleResult.ok;
+                } catch (error) {
+                    console.error('Erro Google Sheets:', error);
                 }
 
-                const formData = new FormData(event.target);
-                const data = {
-                    A: sanitizeInput(formData.get('A')),
-                    B: sanitizeInput(formData.get('B')),
-                    C: sanitizeInput(formData.get('C')),
-                    Nome: sanitizeInput(formData.get('Nome')),
-                    Email: sanitizeInput(formData.get('Email')),
-                    timestamp: new Date().toISOString(),
-                    csrf_token: document.getElementById('csrf_token').value
-                };
+                // Depois Supabase
+                try {
+                    const supabaseResult = await fetch('/api/submit-form', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    supabaseSuccess = supabaseResult.ok;
+                } catch (error) {
+                    console.error('Erro Supabase:', error);
+                }
 
-                // Envio sequencial com feedback
-                await sendFormData(data);
-                
-                // Sucesso - redireciona para página de agradecimento
-                showFlashMessage('Todos os dados foram enviados com sucesso!', 'success');
-                setTimeout(() => {
-                    window.location.href = 'obrigado.html';
-                }, 1000);
+                if (googleSuccess || supabaseSuccess) {
+                    showFlashMessage('Dados enviados com sucesso!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'obrigado.html';
+                    }, 1000);
+                } else {
+                    throw new Error('Falha em ambas as integrações');
+                }
 
             } catch (error) {
                 console.error('Erro no processo de envio:', error);
                 showFlashMessage('Erro ao enviar dados. Por favor, tente novamente.', 'error');
-                submitButton.disabled = false;
             }
         });
     }
