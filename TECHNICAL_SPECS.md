@@ -105,4 +105,5 @@ ago
 ## No supabase enviar para a tabela respostas
 - enviar para a tabela respostas
 
-
+## O projeto é para ser enviado para ambiente online no vercel 
+- 

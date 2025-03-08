@@ -1,80 +1,64 @@
-import { createClient } from '@supabase/supabase-js';
 import { parse } from 'cookie';
-import { body, validationResult } from 'express-validator';
-
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { createClient } from '@supabase/supabase-js';
+import axios from 'axios';
 
 export default async function handler(req, res) {
-    // Habilitar CORS
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+  if (req.method === 'POST') {
+    try {
+      // Obter e validar o token CSRF
+      const cookies = parse(req.headers.cookie || '');
+      const csrfToken = cookies.csrf_token;
 
-    // Responder a requisições OPTIONS (preflight)
-    if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
+      if (!csrfToken || csrfToken !== req.body.csrf_token) {
+        return res.status(403).json({ success: false, message: 'Token CSRF inválido.' });
+      }
+
+      // Sanitizar os dados (exemplo básico)
+      const sanitizedData = {
+        A: req.body.A,
+        B: req.body.B,
+        C: req.body.C,
+        Nome: req.body.Nome,
+        Email: req.body.Email,
+        timestamp: req.body.timestamp,
+      };
+
+      // Enviar para o Google Sheets
+      const googleSheetsUrl = 'https://script.google.com/macros/s/AKfycbzdLpEgmmmlPFV_V-W0s9lF-f3QrtU4fBwmcQEAI5Et962tLFjsLms2FRSivtyYAx_3dA/exec';
+      try {
+          await axios.post(googleSheetsUrl, sanitizedData);
+      } catch (error) {
+          console.error('Erro ao enviar para o Google Sheets:', error);
+          // Continua a execução mesmo se falhar o envio para o Google Sheets
+      }
+
+      // Enviar para o Supabase
+      const supabaseUrl = process.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return res.status(500).json({ success: false, message: 'Variáveis de ambiente do Supabase não configuradas.' });
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+      const { error: supabaseError } = await supabase
+        .from('respostas')
+        .insert([
+          { A: sanitizedData.A, B: sanitizedData.B, C: sanitizedData.C, nome: sanitizedData.Nome, email: sanitizedData.Email },
+        ]);
+
+      if (supabaseError) {
+        console.error('Erro ao inserir no Supabase:', supabaseError);
+        return res.status(500).json({ success: false, message: 'Erro ao inserir no Supabase.' });
+      }
+
+      return res.status(200).json({ success: true, message: 'Dados enviados com sucesso!' });
+    } catch (error) {
+      console.error('Erro ao processar a requisição:', error);
+      return res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
     }
-
-    if (req.method === 'POST') {
-        try {
-            // Get CSRF token from request body and cookie
-            const csrfTokenFromBody = req.body.csrf_token;
-            const cookies = parse(req.headers.cookie || '');
-            const csrfTokenFromCookie = cookies.csrf_token;
-
-            // Validate CSRF token
-            if (!csrfTokenFromBody || !csrfTokenFromCookie || csrfTokenFromBody !== csrfTokenFromCookie) {
-                return res.status(400).json({ message: 'CSRF token validation failed' });
-            }
-
-            // Validate request body
-            await Promise.all([
-                body('A').notEmpty().trim().escape().run(req),
-                body('B').notEmpty().trim().escape().run(req),
-                body('C').notEmpty().trim().escape().run(req),
-                body('nome').notEmpty().trim().escape().run(req),
-                body('email').isEmail().normalizeEmail().run(req),
-            ]);
-
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ message: 'Validation failed', errors: errors.array() });
-            }
-
-            const { A, B, C, nome, email } = req.body;
-
-            const { data, error } = await supabase
-                .from('respostas')
-                .insert([
-                    { A, B, C, nome, email },
-                ])
-                .select();
-
-            if (error) throw error;
-
-            return res.status(200).json({ 
-                ok: true,
-                message: 'Dados enviados com sucesso',
-                data 
-            });
-
-        } catch (error) {
-            console.error('Erro ao enviar para o Supabase:', error);
-            return res.status(500).json({ 
-                ok: false,
-                message: 'Erro ao enviar dados',
-                error: error.message 
-            });
-        }
-    }
-
-    return res.status(405).json({ message: 'Método não permitido' });
+  } else {
+    res.status(405).json({ message: 'Método não permitido' });
+  }
 }
