@@ -4,6 +4,8 @@
 |-- .vercel
     |-- project.json
     |-- README.txt
+|-- api
+    |-- submit-form.js
 |-- css
     |-- webform-mente.css
 |-- form-handler.js

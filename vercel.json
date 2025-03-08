@@ -1,19 +1,23 @@
 {
-  "version": 2,
-  "builds": [
+ "version": 2,
+ "builds": [
+  {
+   "src": "api/**/*.js",
+   "use": "@vercel/node"
+  },
     {
       "src": "**/*",
       "use": "@vercel/static"
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
-  "env": {
-    "SUPABASE_URL": "${SUPABASE_URL}",
-    "SUPABASE_ANON_KEY": "${SUPABASE_ANON_KEY}"
+ ],
+ "routes": [
+  {
+   "src": "/(.*)",
+   "dest": "/$1"
   }
+ ],
+ "env": {
+  "VITE_SUPABASE_URL": "${VITE_SUPABASE_URL}",
+  "VITE_SUPABASE_ANON_KEY": "${VITE_SUPABASE_ANON_KEY}"
+ }
 }
