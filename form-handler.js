@@ -29,25 +29,24 @@ async function handleFormSubmit(event) {
 
   const form = event.target;
   const formData = new FormData(form);
-  formData.append('timestamp', new Date().toISOString()); // Adicionar timestamp
+  formData.append('timestamp', new Date().toISOString());
 
-    // Preparar os dados para o formato que a serverless function espera
-    const data = {
-      A: formData.get('A'),
-      B: formData.get('B'),
-      C: formData.get('C'),
-      nome: formData.get('Nome'),
-      email: formData.get('Email')
-    };
+  const data = {
+    A: formData.get('A'),
+    B: formData.get('B'),
+    C: formData.get('C'),
+    nome: formData.get('Nome'),
+    email: formData.get('Email')
+  };
 
   try {
     console.log('Iniciando processo de envio...');
 
-    // Envio sequencial para evitar atropelos
+    // Envio para Google Sheets
     const googleSheetsResult = await sendToGoogleSheets(formData);
     console.log('Resultado Google Sheets:', googleSheetsResult);
 
-    // Enviar para a serverless function
+    // Envio para Supabase usando a API route
     const supabaseResponse = await fetch('/api/submit-form', {
       method: 'POST',
       headers: {
@@ -56,16 +55,13 @@ async function handleFormSubmit(event) {
       body: JSON.stringify(data),
     });
 
-    const supabaseResult = await supabaseResponse.json();
-
     if (!supabaseResponse.ok) {
-      throw new Error(supabaseResult.error || 'Erro ao enviar para o Supabase');
+      throw new Error(`Erro HTTP: ${supabaseResponse.status}`);
     }
 
+    const supabaseResult = await supabaseResponse.json();
 
-    // Verifica se pelo menos uma integração funcionou
     if (googleSheetsResult.ok || supabaseResult.ok) {
-      console.log('Pelo menos uma integração teve sucesso');
       showFlashMessage('Dados enviados com sucesso!', 'success');
       setTimeout(() => {
         window.location.href = 'obrigado.html';

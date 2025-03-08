@@ -6,6 +6,21 @@ const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default async function handler(req, res) {
+    // Habilitar CORS
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+
+    // Responder a requisições OPTIONS (preflight)
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
+
     if (req.method === 'POST') {
         try {
             const { A, B, C, nome, email } = req.body;
@@ -14,20 +29,26 @@ export default async function handler(req, res) {
                 .from('respostas')
                 .insert([
                     { A, B, C, nome, email },
-                ]);
+                ])
+                .select();
 
-            if (error) {
-                throw error;
-            }
+            if (error) throw error;
 
-            console.log('Dados enviados com sucesso para o Supabase:', data);
-            res.status(200).json({ message: 'Dados enviados com sucesso para o Supabase', data });
+            return res.status(200).json({ 
+                ok: true,
+                message: 'Dados enviados com sucesso',
+                data 
+            });
 
         } catch (error) {
             console.error('Erro ao enviar para o Supabase:', error);
-            res.status(500).json({ message: 'Erro ao enviar para o Supabase', error: error.message });
+            return res.status(500).json({ 
+                ok: false,
+                message: 'Erro ao enviar dados',
+                error: error.message 
+            });
         }
-    } else {
-        res.status(405).json({ message: 'Método não permitido' });
     }
+
+    return res.status(405).json({ message: 'Método não permitido' });
 }
