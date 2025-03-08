@@ -76,10 +76,10 @@ PS C:\form-mente-web\webform-mente-13> vercel env ls | Select-String "SUPABASE"
 Vercel CLI 41.3.2
 > Environment Variables found for carbar1000s-projects/mente-13 
 
- VITE_SUPABASE_ANON_KEY     Encrypted           Production          6h 
-ago     
- VITE_SUPABASE_URL          Encrypted           Production          6h   
-ago
+SUPABASE_ANON_KEY     Encrypted           Production          
+  
+SUPABASE_URL          Encrypted           Production          
+
 
 
 
@@ -106,4 +106,4 @@ ago
 - enviar para a tabela respostas
 
 ## O projeto é para ser enviado para ambiente online no vercel 
-- 
+- o projeto é para ser enviado para ambiente online no vercel
