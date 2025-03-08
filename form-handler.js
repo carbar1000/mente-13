@@ -22,6 +22,11 @@ async function sendToGoogleSheets(formData) {
     }
 }
 
+const SUPABASE_CONFIG = {
+    url: import.meta.env.VITE_SUPABASE_URL,
+    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY
+};
+
 // Função para enviar para Supabase
 async function sendToSupabase(formData) {
     try {
@@ -37,6 +42,7 @@ async function sendToSupabase(formData) {
         console.log('Enviando para Supabase...');
         console.log('SUPABASE_CONFIG.url:', SUPABASE_CONFIG.url);
         console.log('SUPABASE_CONFIG.anonKey:', SUPABASE_CONFIG.anonKey);
+
 
         const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/respostas`, {
             method: 'POST',
@@ -65,20 +71,21 @@ async function sendToSupabase(formData) {
 async function handleFormSubmit(event) {
     event.preventDefault();
     showFlashMessage('Enviando dados...', 'info');
-    
+
     const form = event.target;
     const formData = new FormData(form);
     formData.append('timestamp', new Date().toISOString()); // Adicionar timestamp
-    
+
     try {
         console.log('Iniciando processo de envio...');
-        
+
         // Envio sequencial para evitar atropelos
         const googleSheetsResult = await sendToGoogleSheets(formData);
         console.log('Resultado Google Sheets:', googleSheetsResult);
-        
+
         const supabaseResult = await sendToSupabase(formData);
         console.log('Resultado Supabase:', supabaseResult);
+
 
         // Verifica se pelo menos uma integração funcionou
         if (googleSheetsResult.ok || supabaseResult.ok) {
@@ -90,18 +97,22 @@ async function handleFormSubmit(event) {
         } else {
             throw new Error('Ambas as integrações falharam');
         }
+
+
     } catch (error) {
         console.error('Erro no processo de envio:', error);
         showFlashMessage('Erro ao enviar dados. Por favor, tente novamente.', 'error');
     }
 }
 
+
+
 // Função para mostrar mensagens de feedback
 function showFlashMessage(message, type = 'info') {
     const flashDiv = document.getElementById('flashMessage') || document.createElement('div');
     flashDiv.className = `flash-message ${type}`;
     flashDiv.textContent = message;
-    
+
     if (!document.getElementById('flashMessage')) {
         document.body.appendChild(flashDiv);
     }
@@ -113,5 +124,5 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
     }
-  });
+});
 
