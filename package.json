@@ -2,16 +2,19 @@
   "name": "webform-mente-13",
   "version": "1.0.0",
   "description": "Formulário para pesquisa de perfil empreendedor",
-  "scripts": {
-    "dev": "vercel dev"
-  },
-  "dependencies": {
+    "scripts": {
+        "dev": "vercel dev",
+        "test": "jest"
+    },
+    "dependencies": {
     "@supabase/supabase-js": "^2.39.7",
-    "axios": "^1.6.7",
-    "cookie": "^0.6.0",
-    "uuid": "^9.0.1"
+    "cookie": "^1.0.2"
   },
   "devDependencies": {
-    "vercel": "^41.3.2"
+    "@eslint/js": "^9.22.0",
+    "eslint": "^9.22.0",
+    "globals": "^16.0.0",
+    "jest": "^29.7.0",
+    "vercel": "^25.2.0"
   }
 }

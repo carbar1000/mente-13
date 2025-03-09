@@ -1,6 +1,5 @@
 import { parse } from 'cookie';
 import { createClient } from '@supabase/supabase-js';
-import axios from 'axios';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -8,29 +7,20 @@ export default async function handler(req, res) {
       // Obter e validar o token CSRF
       const cookies = parse(req.headers.cookie || '');
       const csrfToken = cookies.csrf_token;
-
+      
       if (!csrfToken || csrfToken !== req.body.csrf_token) {
-        return res.status(403).json({ success: false, message: 'Token CSRF inválido.' });
-      }
+          return res.status(403).json({ success: false, message: 'Token CSRF inválido.' });
+        }
 
       // Sanitizar os dados (exemplo básico)
-      const sanitizedData = {
-        A: req.body.A,
-        B: req.body.B,
-        C: req.body.C,
-        Nome: req.body.Nome,
-        Email: req.body.Email,
-        timestamp: req.body.timestamp,
-      };
-
-      // Enviar para o Google Sheets
-      const googleSheetsUrl = 'https://script.google.com/macros/s/AKfycbzdLpEgmmmlPFV_V-W0s9lF-f3QrtU4fBwmcQEAI5Et962tLFjsLms2FRSivtyYAx_3dA/exec';
-      try {
-          await axios.post(googleSheetsUrl, sanitizedData);
-      } catch (error) {
-          console.error('Erro ao enviar para o Google Sheets:', error);
-          // Continua a execução mesmo se falhar o envio para o Google Sheets
-      }
+        const sanitizedData = {
+          A: req.body.A,
+          B: req.body.B,
+          C: req.body.C,
+          Nome: req.body.Nome,
+          Email: req.body.Email,
+          timestamp: req.body.timestamp,
+        };
 
       // Enviar para o Supabase
       const supabaseUrl = process.env.SUPABASE_URL;

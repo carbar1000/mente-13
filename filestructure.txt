@@ -9,9 +9,12 @@
     |-- submit-form.js
 |-- css
     |-- webform-mente.css
-|-- form-handler.js
+|-- eslint.config.mjs
 |-- index.html
+|-- jest.config.js
 |-- js
+    |-- form-handler.js
+    |-- form-handler.test.js
     |-- server.js
     |-- webform-mente-navigate.js
     |-- webform-mente.js

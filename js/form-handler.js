@@ -1,3 +1,5 @@
+import { sendToGoogleSheets, showFlashMessage } from './webform-mente.js';
+
 async function sendFormData(data) {
     try {
         // 1. Primeiro envio - Google Sheets
@@ -146,15 +148,15 @@ function sanitizeInput(input) {
         .trim()
         .replace(/[<>]/g, '')
         .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
+        .replace(/"/g, '"')
         .replace(/'/g, '&#x27;')
         .replace(/\//g, '&#x2F;');
 
     return sanitized;
 }
 
-async function getCsrfToken() {
-    const response = await fetch('/api/csrf-token');
-    const data = await response.json();
-    return data.csrfToken;
-}
+// async function getCsrfToken() { // Comentada porque não está sendo usada
+//     const response = await fetch('/api/csrf-token');
+//     const data = await response.json();
+//     return data.csrfToken;
+// }

@@ -9,16 +9,40 @@ export function showFlashMessage(message, type) {
     }, 3000);
 }
 
-// Outras funções...
-function generateCSRFToken() {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+// Função para enviar dados para o Google Sheets
+export async function sendToGoogleSheets(data) {
+    const url = 'https://script.google.com/macros/s/AKfycbzdLpEgmmmlPFV_V-W0s9lF-f3QrtU4fBwmcQEAI5Et962tLFjsLms2FRSivtyYAx_3dA/exec';
+    try {
+        await fetch(url, {  // Removido 'const response ='
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        return { ok: true };
+
+    } catch (error) {
+        console.error('Erro ao enviar para o Google Sheets:', error);
+        return { ok: false };
+    }
+}
+
+
+// Função para inicializar o formulário (obtendo o CSRF token)
+async function initializeForm() {
+    const response = await fetch('/api/csrf-token');
+    const data = await response.json();
+    document.getElementById('csrf_token').value = data.csrfToken;
 }
 
 // Também precisamos exportar outras funções que são usadas globalmente
 export function startSurvey() {
     const intro = document.getElementById('intro');
     const form = document.getElementById('myForm');
-    
+
     if (intro && form) {
         intro.classList.add('hidden');
         form.classList.remove('hidden');
@@ -29,53 +53,11 @@ export function startSurvey() {
 export function autoNext() {
     const currentContainer = document.querySelector('.form-container.active');
     if (currentContainer) {
-        const nextButton = currentContainer.querySelector('button[onclick="navigate(1)"]');
-        if (nextButton) {
-            setTimeout(() => {
-                nextButton.click();
-            }, 500);
-        }
+        // Removido código que chamava navigate() diretamente. A navegação é controlada por webform-mente-navigate.js
     }
-}
-
-// Função de validação do formulário
-function validateForm(currentStep) {
-    const container = document.querySelector(`.form-container[data-step="${currentStep}"]`);
-    const options = container.querySelectorAll('input[type="radio"]');
-    const errorMessage = container.querySelector('.error-message');
-    
-    if (!errorMessage) {
-        const msg = document.createElement('div');
-        msg.className = 'error-message';
-        msg.textContent = 'Por favor, escolha uma resposta!';
-        container.appendChild(msg);
-    }
-
-    let isChecked = false;
-    options.forEach(option => {
-        if (option.checked) isChecked = true;
-    });
-
-    if (!isChecked) {
-        container.querySelector('.error-message').classList.add('show');
-        container.classList.add('shake');
-        setTimeout(() => container.classList.remove('shake'), 500);
-        return false;
-    }
-
-    container.querySelector('.error-message').classList.remove('show');
-    return true;
-}
-
-// Modificar a função que controla a navegação entre as etapas
-function nextStep() {
-    if (!validateForm(currentStep)) return;
-    
-    // ... resto do código existente para navegação ...
 }
 
 // Make functions available globally
 window.startSurvey = startSurvey;
 window.autoNext = autoNext;
-window.validateForm = validateForm;
 window.showFlashMessage = showFlashMessage;
