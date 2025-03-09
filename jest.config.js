@@ -1,7 +1,8 @@
 /** @type {import('jest').Config} */
-const config = {
-    verbose: true,
-    testEnvironment: 'jsdom',
+export default {
+  verbose: true,
+  testEnvironment: 'jsdom',
+  globals: {
+    "BABEL_ENV": "test"
+  },
 };
-
-module.exports = config;

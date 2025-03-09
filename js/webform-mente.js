@@ -58,6 +58,8 @@ export function autoNext() {
 }
 
 // Make functions available globally
-window.startSurvey = startSurvey;
-window.autoNext = autoNext;
-window.showFlashMessage = showFlashMessage;
+export function initializeGlobalFunctions() {
+    window.startSurvey = startSurvey;
+    window.autoNext = autoNext;
+    window.showFlashMessage = showFlashMessage;
+}

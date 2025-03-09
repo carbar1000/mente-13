@@ -7,6 +7,7 @@
 |-- api
     |-- csrf-token.js
     |-- submit-form.js
+|-- babel.config.json
 |-- css
     |-- webform-mente.css
 |-- eslint.config.mjs
